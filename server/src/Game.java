@@ -14,6 +14,7 @@ public class Game {
     private int gameTime = 600;
     private  ServerSocket ss;
     private int id = 0;
+    private boolean gameStart = false;
 
     public Game(){
         try {
@@ -29,7 +30,7 @@ public class Game {
     Schaut ob neue Player connecten wollen und fügt diese der Lobby hinzu, außerdem wird geprueft ob die Player ready sind
      */
     public void waitForPlayers(){
-        while (true){
+        while (!gameStart){
              acceptPlayer();
              listenToPlayers();
         }
@@ -39,7 +40,7 @@ public class Game {
     Sendet an alle verbunden Player die vom Spielleiter eingerichteten Einstellungen und Trennt sie anschließend.
      */
     public void startTheGameAlready(){
-
+        gameStart = true;
     }
 
     /*
@@ -65,6 +66,11 @@ public class Game {
      */
     public void listenToPlayers(){
 
+        for (Player p:players)
+        {
+            p.checkForMessage();
+        }
+
     }
 
     /*
@@ -74,19 +80,30 @@ public class Game {
 
     }
 
+    /*
+    setter fuer spieleinstellungen
+     */
     public void setDRatio(int dRatio) {
-        this.dRatio = dRatio;
+        if (dRatio >= 0 && dRatio <= 100){
+            this.dRatio = dRatio;
+        }
+
     }
 
     public void setTRatio(int tRatio) {
-        this.tRatio = tRatio;
+        if(tRatio > 0 && tRatio <= 75) {
+            this.tRatio = tRatio;
+        }
     }
 
     public void setPrepTime(int prepTime) {
-        this.prepTime = prepTime;
+        if(prepTime >= 0) {
+            this.prepTime = prepTime;
+        }
     }
 
     public void setGameTime(int gameTime) {
+        if(gameTime >= 120 && gameTime <= 1200)
         this.gameTime = gameTime;
     }
 
