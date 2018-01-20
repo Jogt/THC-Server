@@ -21,6 +21,7 @@ public class Player {
             byte[] tmp = new byte[20];
             socket.getInputStream().read(tmp);
             this.name = new String(tmp);
+            name.replaceAll("\0","");
         }catch(IOException e){
             e.printStackTrace();
         }
