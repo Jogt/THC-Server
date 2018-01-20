@@ -48,6 +48,13 @@ public class Player {
         name = name.replaceAll("\n","");
         name = name.replaceAll("\0","");
         System.out.println("New Player: ID: "+id+" Name: "+name);
+
+        if(leader) {
+            sendData("leader");
+        }
+        else if(!leader){
+            sendData("notleader");
+        }
     }
 
     public void checkForMessage(){
@@ -86,7 +93,7 @@ public class Player {
         game.refreshPlayers();
     }
 
-    public void sendPlayerData(String data)
+    public void sendData(String data)
     {
         try {
             socket.getOutputStream().write(data.getBytes());
