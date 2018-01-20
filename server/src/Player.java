@@ -24,4 +24,21 @@ public class Player {
         }
         System.out.println("New Player: ID: "+id+" Name: "+name);
     }
+
+    public void checkForMessage(){
+        try{
+            if(socket.getInputStream().available()>0){
+                byte[] tmp = new byte[100];
+                socket.getInputStream().read(tmp);
+                String message = new String(tmp);
+                interpretMessage(message);
+            }
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    private void interpretMessage(String msg){
+
+    }
 }
