@@ -77,6 +77,16 @@ public class Player {
         game.refreshPlayers();
     }
 
+    public void sendPlayerData(String data)
+    {
+        try {
+            socket.getOutputStream().write(data.getBytes());
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
     public boolean isReady(){
         return ready;
     }

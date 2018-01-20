@@ -66,8 +66,7 @@ public class Game {
      */
     public void listenToPlayers(){
 
-        for (Player p:players)
-        {
+        for (Player p:players) {
             p.checkForMessage();
         }
 
@@ -77,7 +76,17 @@ public class Game {
     Sendet die neuen Daten an alle Player
     */
     public void refreshPlayers(){
-
+        String message = "players: ";
+        for(Player p:players) {
+            message += p.getId() + ",";
+            message += p.getName() + ",";
+            message += p.isLeader()? "1":"0" + ",";
+            message += p.isReady()? "1":"0" + "|";
+        }
+        for (Player p:players)
+        {
+            p.sendPlayerData(message);
+        }
     }
 
     /*
