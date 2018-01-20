@@ -1,30 +1,38 @@
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 
 public class Game {
 
 
-    private ArrayList<Player> Players = new ArrayList(); //Liste in die alle Player gespeichert werden
+    private ArrayList<Player> players = new ArrayList(); //Liste in die alle Player gespeichert werden
     private int tRatio = 33;
     private int dRatio = 25;
     private int prepTime = 30;
     private int gameTime = 600;
+    private  ServerSocket ss;
+    private int id = 0;
 
     public Game(){
         try {
-            ServerSocket ss = new ServerSocket(2307);
+            ss = new ServerSocket(2307);
+            ss.setSoTimeout(300);
         }
         catch (IOException e)
         {
-
+            e.printStackTrace();
         }
     }
     /*
     Schaut ob neue Player connecten wollen und fügt diese der Lobby hinzu, außerdem wird geprueft ob die Player ready sind
      */
     public void waitForPlayers(){
-
+        while (true){
+             acceptPlayer();
+             listenToPlayers();
+        }
     }
 
     /*
@@ -35,9 +43,20 @@ public class Game {
     }
 
     /*
-
+    fuegt einen Spieler hinzu
      */
     public void acceptPlayer(){
+        Socket socket = null;
+        try {
+            socket = ss.accept();
+        }catch (IOException e){
+            if(! (e instanceof SocketTimeoutException)) {
+                e.printStackTrace();
+
+            }
+            return;
+        }
+        players.add(new Player(socket, id++, this, true));
 
     }
 
@@ -72,6 +91,7 @@ public class Game {
     }
 
     public static void main(String[] args){
-
+        Game game = new Game();
+        game.waitForPlayers();
     }
 }
