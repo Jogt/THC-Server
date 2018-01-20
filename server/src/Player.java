@@ -4,14 +4,21 @@ import java.net.SocketTimeoutException;
 
 public class Player {
 
+    public enum Role {
+        traitor,
+        innocent,
+        detective
+    }
     private final int NAMETIMEOUT = 1000;
 
+    private Role role;
     private Socket socket;
     private String name;
     private boolean ready;
     private int id;
     private Game game;
     private boolean leader;
+
 
     public Player(Socket socket, int id, Game game, boolean leader){
         this.socket = socket;
@@ -89,6 +96,16 @@ public class Player {
         }
     }
 
+    public void closeSocket(){
+        try {
+            socket.close();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
     public boolean isReady(){
         return ready;
     }
@@ -103,5 +120,14 @@ public class Player {
 
     public int getId(){
         return id;
+    }
+
+    public void setRole(Role r){
+        role = r;
+    }
+
+    public Role getRole()
+    {
+        return role;
     }
 }

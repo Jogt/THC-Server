@@ -3,6 +3,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class Game {
 
@@ -34,15 +35,65 @@ public class Game {
              acceptPlayer();
              listenToPlayers();
         }
+        go();
     }
 
     /*
-    Sendet an alle verbunden Player die vom Spielleiter eingerichteten Einstellungen und Trennt sie anschließend.
+    sorgt dafuer das nicht mehr auf neue Spieler gewartet wird
      */
     public void startTheGameAlready(){
         gameStart = true;
     }
+    /*
+    Sendet an alle verbunden Player die vom Spielleiter eingerichteten Einstellungen und Trennt sie anschließend
+     */
+    public void go(){
+        int ttatsaechlich  = players.size()*tRatio/100;
+        if (ttatsaechlich == 0){
+            ttatsaechlich++;
+        }
+        int dtatsaechlich = (players.size()-ttatsaechlich)*dRatio/100;
+        Collections.shuffle(players);
+        String tmessage = "|Traitors:";
+        String startMessage = "Round start:";
+        startMessage += prepTime + ",";
+        startMessage += gameTime +"," ;
+        for(Player p:players)
+        {
+            if(ttatsaechlich > 0)
+            {
+                p.setRole(Player.Role.traitor);
+                tmessage += p.getName();
+                ttatsaechlich--;
+            }
+            else if(dtatsaechlich > 0)
+            {
+                p.setRole(Player.Role.detective);
+                startMessage += p.getName()+ ",";
+                dtatsaechlich--;
+            }
+            else
+            {
+                p.setRole(Player.Role.innocent);
+            }
+        }
+        for(Player p:players){
+            switch(p.getRole())
+            {
+                case innocent:
+                    p.sendPlayerData(startMessage+"|"+ p.getRole()+";");
+                    break;
+                case detective:
+                    p.sendPlayerData(startMessage+"|"+ p.getRole()+";");
+                    break;
+                case traitor:
+                    p.sendPlayerData(startMessage+"|"+ p.getRole()+tmessage+";") ;
+            }
+            p.closeSocket();
+        }
 
+
+    }
     /*
     fuegt einen Spieler hinzu
      */
@@ -85,7 +136,7 @@ public class Game {
         }
         for (Player p:players)
         {
-            p.sendPlayerData(message);
+            p.sendPlayerData(message +";");
         }
     }
 
