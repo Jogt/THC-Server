@@ -1,7 +1,10 @@
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 
 public class Player {
+
+    private final int NAMETIMEOUT = 1000;
 
     private Socket socket;
     private String name;
@@ -16,11 +19,20 @@ public class Player {
         this.game = game;
         this.leader = leader;
         this.name = "";
+
+
         try{
             socket.getOutputStream().write("name".getBytes());
             byte[] tmp = new byte[20];
+            long timeout = System.currentTimeMillis()+NAMETIMEOUT;
+            while(System.currentTimeMillis() < timeout && socket.getInputStream().available() == 0){}
+            if(!(System.currentTimeMillis() >= timeout)){
+              throw new SocketTimeoutException();
+            }
             socket.getInputStream().read(tmp);
             this.name = new String(tmp);
+            name.replaceAll("\0","");
+            name.replaceAll("\n","");
         }catch(IOException e){
             e.printStackTrace();
         }
@@ -50,16 +62,34 @@ public class Player {
                 ready = true;
             } else if (s.matches("^notready$")) {
                 ready = false;
-            } else if (s.matches("^tratio:\\d\\d$")  && leader) {
-                game.setTRatio( Integer.parseInt(s.substring(s.indexOf(':')+1), s.indexOf(':')+3));
-            } else if (s.matches("^dratio:\\d\\d$") && leader) {
-                game.setDRatio( Integer.parseInt(s.substring(s.indexOf(':')+1), s.indexOf(':')+3));
-            } else if (s.matches("^preptime:\\d\\d$")  &&  leader) {
-                game.setPrepTime(Integer.parseInt(s.substring(s.indexOf(':')+1), s.indexOf(':')+3));
-            } else if (s.matches("^gametime:\\d\\d$")  && leader) {
-                game.setGameTime( Integer.parseInt(s.substring(s.indexOf(':')+1), s.indexOf(':')+3));
+            } else if (s.matches("^tratio:(\\d)+$")  && leader) {
+                game.setTRatio( Integer.parseInt(s.substring(s.indexOf(':')+1)));
+            } else if (s.matches("^dratio:(\\d)+$") && leader) {
+                game.setDRatio( Integer.parseInt(s.substring(s.indexOf(':')+1)));
+            } else if (s.matches("^preptime:(\\d)+$")  &&  leader) {
+                game.setPrepTime(Integer.parseInt(s.substring(s.indexOf(':')+1)));
+            } else if (s.matches("^gametime:(\\d)+$")  && leader) {
+                game.setGameTime( Integer.parseInt(s.substring(s.indexOf(':')+1)));
+            } else if (s.matches("^start$")  && leader) {
+                game.startTheGameAlready();
             }
         }
         game.refreshPlayers();
+    }
+
+    public boolean isReady(){
+        return ready;
+    }
+
+    public String getName(){
+        return name;
+    }
+
+    public boolean isLeader(){
+        return leader;
+    }
+
+    public int getId(){
+        return id;
     }
 }
