@@ -23,31 +23,33 @@ public class Player {
 
         try{
             socket.getOutputStream().write("name".getBytes());
-            byte[] tmp = new byte[20];
             long timeout = System.currentTimeMillis()+NAMETIMEOUT;
-            while(System.currentTimeMillis() < timeout && socket.getInputStream().available() == 0){}
-            if(!(System.currentTimeMillis() >= timeout)){
+            while(System.currentTimeMillis() <= timeout && socket.getInputStream().available() == 0){}
+            if(System.currentTimeMillis() >= timeout){
               throw new SocketTimeoutException();
             }
+            byte[] tmp = new byte[socket.getInputStream().available()];
             socket.getInputStream().read(tmp);
             this.name = new String(tmp);
-            name.replaceAll("\0","");
-            name.replaceAll("\n","");
         }catch(IOException e){
             e.printStackTrace();
         }
         if(name.equals("")){
             name = "player"+id;
         }
+        name = name.replaceAll("\r","");
+        name = name.replaceAll("\n","");
+        name = name.replaceAll("\0","");
         System.out.println("New Player: ID: "+id+" Name: "+name);
     }
 
     public void checkForMessage(){
         try{
             if(socket.getInputStream().available()>0){
-                byte[] tmp = new byte[100];
+                byte[] tmp = new byte[socket.getInputStream().available()];
                 socket.getInputStream().read(tmp);
                 String message = new String(tmp);
+                message = message.replaceAll("\n","");
                 interpretMessage(message);
             }
         }catch(IOException e){
