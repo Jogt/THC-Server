@@ -21,21 +21,37 @@ public class Game {
         try {
             ss = new ServerSocket(2307);
             ss.setSoTimeout(300);
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
+
         }
+    }
+    /*
+    sorgt dafuer das gleich eine Lobby geoeffnet wird , nachdem die alte geschlossen wird
+     */
+    public void play(){
+        while(true)
+        {
+            waitForPlayers();
+            go();
+            cleanup();
+        }
+    }
+
+    private void cleanup(){
+        players.clear();
+        id = 0;
+        gameStart = false;
     }
     /*
     Schaut ob neue Player connecten wollen und fügt diese der Lobby hinzu, außerdem wird geprueft ob die Player ready sind
      */
     public void waitForPlayers(){
-        while (!gameStart){
-             acceptPlayer();
-             listenToPlayers();
+
+        while (!gameStart) {
+            acceptPlayer();
+            listenToPlayers();
         }
-        go();
     }
 
     /*
@@ -44,6 +60,9 @@ public class Game {
     public void startTheGameAlready(){
         gameStart = true;
     }
+
+
+
     /*
     Sendet an alle verbunden Player die vom Spielleiter eingerichteten Einstellungen und Trennt sie anschließend
      */
@@ -54,10 +73,11 @@ public class Game {
         }
         int dtatsaechlich = (players.size()-ttatsaechlich)*dRatio/100;
         Collections.shuffle(players);
-        String tmessage = "|Traitors:";
-        String startMessage = "Round start:";
+        String tmessage = "|";
+        String dmessage = "|";
+        String startMessage = "roundstart:";
         startMessage += prepTime + ",";
-        startMessage += gameTime +"," ;
+        startMessage += gameTime ;
         for(Player p:players)
         {
             if(ttatsaechlich > 0)
@@ -65,12 +85,20 @@ public class Game {
                 p.setRole(Player.Role.traitor);
                 tmessage += p.getName();
                 ttatsaechlich--;
+                if(ttatsaechlich > 0)
+                {
+                    tmessage += ",";
+                }
             }
             else if(dtatsaechlich > 0)
             {
                 p.setRole(Player.Role.detective);
-                startMessage += p.getName()+ ",";
+                dmessage += p.getName();
                 dtatsaechlich--;
+                if(dtatsaechlich > 0)
+                {
+                    dmessage += ",";
+                }
             }
             else
             {
@@ -81,17 +109,16 @@ public class Game {
             switch(p.getRole())
             {
                 case innocent:
-                    p.sendPlayerData(startMessage+"|"+ p.getRole()+";");
+                    p.sendPlayerData(startMessage+"|"+ p.getRole()+dmessage+";");
                     break;
                 case detective:
-                    p.sendPlayerData(startMessage+"|"+ p.getRole()+";");
+                    p.sendPlayerData(startMessage+"|"+ p.getRole()+dmessage+";");
                     break;
                 case traitor:
-                    p.sendPlayerData(startMessage+"|"+ p.getRole()+tmessage+";") ;
+                    p.sendPlayerData(startMessage+"|"+ p.getRole()+dmessage+tmessage+";");
             }
             p.closeSocket();
         }
-
 
     }
     /*
@@ -127,12 +154,16 @@ public class Game {
     Sendet die neuen Daten an alle Player
     */
     public void refreshPlayers(){
-        String message = "players: ";
-        for(Player p:players) {
-            message += p.getId() + ",";
-            message += p.getName() + ",";
-            message += p.isLeader()? "1":"0" + ",";
-            message += p.isReady()? "1":"0" + "|";
+        String message = "players:";
+        for(int i = 0; i < players.size();i++) {
+            message += players.get(i).getId() + ",";
+            message += players.get(i).getName() + ",";
+            message += (players.get(i).isLeader()? "1":"0") + ",";
+            message += (players.get(i).isReady()? "1":"0");
+            if(i < players.size()-1)
+            {
+                message += "|";
+            }
         }
         for (Player p:players)
         {
@@ -169,6 +200,7 @@ public class Game {
 
     public static void main(String[] args){
         Game game = new Game();
-        game.waitForPlayers();
+
+        game.play();
     }
 }
