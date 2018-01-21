@@ -16,6 +16,7 @@ public class Game {
     private  ServerSocket ss;
     private int id = 0;
     private boolean gameStart = false;
+    private int timer = 0;
 
     public Game(){
         try {
@@ -42,13 +43,39 @@ public class Game {
         players.clear();
         id = 0;
         gameStart = false;
+        tRatio = 33;
+        dRatio = 25;
+        prepTime = 30;
+        gameTime = 600;
     }
+    /*
+    preuft players auf inactivitaet
+     */
+    private  void checkActivity() {
+        if(timer > 6000) {
+            for (Player p:players) {
+                p.sendData("areyouthere;");
+            }
+            timer = 0;
+        }
+    }
+
+    /*
+    entfernt alle spieler aus der Liste die nicht mehr connected sind.
+     */
+    private void killDeadPlayers() {
+        players.removeIf(p->p.isdead());
+    }
+
     /*
     Schaut ob neue Player connecten wollen und fügt diese der Lobby hinzu, außerdem wird geprueft ob die Player ready sind
      */
     public void waitForPlayers(){
 
         while (!gameStart) {
+            killDeadPlayers();
+            //checkActivity();
+            //timer++;
             acceptPlayer();
             listenToPlayers();
         }
@@ -109,13 +136,13 @@ public class Game {
             switch(p.getRole())
             {
                 case innocent:
-                    p.sendPlayerData(startMessage+"|"+ p.getRole()+dmessage+";");
+                    p.sendData(startMessage+"|"+ p.getRole()+dmessage+ "|"+";");
                     break;
                 case detective:
-                    p.sendPlayerData(startMessage+"|"+ p.getRole()+dmessage+";");
+                    p.sendData(startMessage+"|"+ p.getRole()+dmessage+"|"+";");
                     break;
                 case traitor:
-                    p.sendPlayerData(startMessage+"|"+ p.getRole()+dmessage+tmessage+";");
+                    p.sendData(startMessage+"|"+ p.getRole()+dmessage+tmessage+";");
             }
             p.closeSocket();
         }
@@ -125,9 +152,11 @@ public class Game {
     fuegt einen Spieler hinzu
      */
     public void acceptPlayer(){
+        killDeadPlayers();
         Socket socket = null;
         try {
             socket = ss.accept();
+
         }catch (IOException e){
             if(! (e instanceof SocketTimeoutException)) {
                 e.printStackTrace();
@@ -136,6 +165,7 @@ public class Game {
             return;
         }
         players.add(new Player(socket, id++, this, true));
+        refreshPlayers();
 
     }
 
@@ -143,7 +173,7 @@ public class Game {
      geht alle Players in einer Schleife durch und prueft ob diese neue Nachrichten vermittelt haben
      */
     public void listenToPlayers(){
-
+        killDeadPlayers();
         for (Player p:players) {
             p.checkForMessage();
         }
@@ -154,6 +184,7 @@ public class Game {
     Sendet die neuen Daten an alle Player
     */
     public void refreshPlayers(){
+        killDeadPlayers();
         String message = "players:";
         for(int i = 0; i < players.size();i++) {
             message += players.get(i).getId() + ",";
@@ -167,7 +198,7 @@ public class Game {
         }
         for (Player p:players)
         {
-            p.sendPlayerData(message +";");
+            p.sendData(message +";");
         }
     }
 

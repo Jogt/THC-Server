@@ -18,7 +18,7 @@ public class Player {
     private int id;
     private Game game;
     private boolean leader;
-
+    private boolean dead;
 
     public Player(Socket socket, int id, Game game, boolean leader){
         this.socket = socket;
@@ -26,6 +26,7 @@ public class Player {
         this.game = game;
         this.leader = leader;
         this.name = "";
+        this.dead = false;
 
 
         try{
@@ -50,10 +51,10 @@ public class Player {
         System.out.println("New Player: ID: "+id+" Name: "+name);
 
         if(leader) {
-            sendData("leader");
+            sendData("leader;");
         }
         else if(!leader){
-            sendData("notleader");
+            sendData("noleader;");
         }
     }
 
@@ -87,6 +88,7 @@ public class Player {
             } else if (s.matches("^gametime:(\\d)+$")  && leader) {
                 game.setGameTime( Integer.parseInt(s.substring(s.indexOf(':')+1)));
             } else if (s.matches("^start$")  && leader) {
+                System.out.println("Start!");
                 game.startTheGameAlready();
             }
         }
@@ -100,6 +102,7 @@ public class Player {
         }
         catch (IOException e){
             e.printStackTrace();
+            dead = true;
         }
     }
 
@@ -127,6 +130,10 @@ public class Player {
 
     public int getId(){
         return id;
+    }
+
+    public boolean isdead(){
+        return dead;
     }
 
     public void setRole(Role r){
