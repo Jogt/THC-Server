@@ -8,7 +8,7 @@ import java.util.Collections;
 public class Game {
 
 
-    private ArrayList<Player> players = new ArrayList(); //Liste in die alle Player gespeichert werden
+    private ArrayList<Player> players = new ArrayList<>(); //Liste in die alle Player gespeichert werden
     private int tRatio = 33;
     private int dRatio = 25;
     private int prepTime = 30;
@@ -208,6 +208,7 @@ public class Game {
     public void setDRatio(int dRatio) {
         if (dRatio >= 0 && dRatio <= 100){
             this.dRatio = dRatio;
+            System.out.println("Changed dratio to "+dRatio);
         }
 
     }
@@ -215,18 +216,22 @@ public class Game {
     public void setTRatio(int tRatio) {
         if(tRatio > 0 && tRatio <= 75) {
             this.tRatio = tRatio;
+            System.out.println("Changed tratio to "+tRatio);
         }
     }
 
     public void setPrepTime(int prepTime) {
         if(prepTime >= 0) {
             this.prepTime = prepTime;
+            System.out.println("Changed prepTime to "+prepTime);
         }
     }
 
     public void setGameTime(int gameTime) {
-        if(gameTime >= 120 && gameTime <= 1200)
-        this.gameTime = gameTime;
+        if(gameTime >= 120 && gameTime <= 1200){
+            this.gameTime = gameTime;
+            System.out.println("Changed gametime to "+gameTime);
+        }
     }
 
     public static void main(String[] args){

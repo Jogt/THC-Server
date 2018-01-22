@@ -40,7 +40,12 @@ public class Player {
             socket.getInputStream().read(tmp);
             this.name = new String(tmp);
         }catch(IOException e){
-            e.printStackTrace();
+            if(e instanceof SocketTimeoutException){
+                System.out.println("New player didn't send name in time");
+            }else{
+                e.printStackTrace();
+                setDead(true);
+            }
         }
         if(name.equals("")){
             name = "player"+id;
@@ -69,6 +74,7 @@ public class Player {
             }
         }catch(IOException e){
             e.printStackTrace();
+            setDead(true);
         }
     }
 
@@ -102,7 +108,7 @@ public class Player {
         }
         catch (IOException e){
             e.printStackTrace();
-            dead = true;
+            setDead(true);
         }
     }
 
@@ -134,6 +140,13 @@ public class Player {
 
     public boolean isdead(){
         return dead;
+    }
+
+    private void setDead(boolean b){
+        if(b){
+            System.out.println("Killing Player "+name);
+        }
+        dead = b;
     }
 
     public void setRole(Role r){
